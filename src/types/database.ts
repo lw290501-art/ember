@@ -1,0 +1,97 @@
+export type TripStatus = 'planning' | 'ongoing' | 'completed'
+export type MediaType = 'photo' | 'video' | 'voice' | 'ticket'
+
+// NOTE: these must be `type` aliases, not `interface`s. supabase-js's generic
+// client requires each table's Row/Insert/Update to structurally satisfy
+// Record<string, unknown>, and TypeScript only recognizes that for `type`
+// aliases — a same-shaped `interface` fails the check (no implicit index
+// signature), which silently collapses every query's argument/result types
+// to `never`.
+export type Trip = {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  cover_photo_url: string | null
+  start_date: string | null
+  end_date: string | null
+  status: TripStatus
+  created_at: string
+}
+
+export type BucketListItem = {
+  id: string
+  user_id: string
+  trip_id: string | null
+  place_name: string
+  country: string | null
+  notes: string | null
+  is_done: boolean
+  lat: number | null
+  lng: number | null
+  created_at: string
+}
+
+export type Pin = {
+  id: string
+  trip_id: string
+  lat: number
+  lng: number
+  label: string
+  notes: string | null
+  visited_at: string | null
+  created_at: string
+}
+
+export type Media = {
+  id: string
+  trip_id: string
+  pin_id: string | null
+  type: MediaType
+  storage_path: string
+  caption: string | null
+  taken_at: string | null
+  created_at: string
+}
+
+// Minimal hand-written schema shape (in place of Supabase's generated types)
+// so the typed client (createClient<Database>) has row/insert/update shapes
+// to check against. Regenerate with `supabase gen types` once the project
+// is live if the schema drifts from this file. Each table needs Relationships
+// (even if empty) and the schema needs Views/Functions to satisfy supabase-js's
+// GenericSchema constraint.
+export type Database = {
+  public: {
+    Tables: {
+      trips: {
+        Row: Trip
+        Insert: Omit<Trip, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<Trip, 'id' | 'user_id'>>
+        Relationships: []
+      }
+      bucket_list_items: {
+        Row: BucketListItem
+        Insert: Omit<BucketListItem, 'id' | 'created_at'> & {
+          id?: string
+          created_at?: string
+        }
+        Update: Partial<Omit<BucketListItem, 'id' | 'user_id'>>
+        Relationships: []
+      }
+      pins: {
+        Row: Pin
+        Insert: Omit<Pin, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<Pin, 'id' | 'trip_id'>>
+        Relationships: []
+      }
+      media: {
+        Row: Media
+        Insert: Omit<Media, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<Media, 'id' | 'trip_id'>>
+        Relationships: []
+      }
+    }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+  }
+}
