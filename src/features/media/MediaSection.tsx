@@ -102,13 +102,15 @@ export function MediaSection({ tripId }: { tripId: string }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Photos, videos & mementos</h2>
+      <h2 className="mb-3 font-display text-lg font-semibold text-plum-800 dark:text-blush-50">
+        Photos, videos & mementos
+      </h2>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <select
           value={uploadType}
           onChange={(e) => setUploadType(e.target.value as typeof uploadType)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-xl border border-blush-200 bg-white px-3 py-2 text-sm text-plum-800 dark:border-plum-700 dark:bg-plum-800 dark:text-blush-50"
         >
           <option value="photo">Photo</option>
           <option value="video">Video</option>
@@ -117,7 +119,7 @@ export function MediaSection({ tripId }: { tripId: string }) {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="rounded-lg border border-teal-600 px-3 py-2 text-sm font-medium text-teal-600 hover:bg-teal-50 disabled:opacity-60 dark:hover:bg-teal-900/20"
+          className="rounded-full border border-blush-400 px-3 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
           {uploading ? 'Uploading…' : '+ Upload files'}
         </button>
@@ -134,29 +136,29 @@ export function MediaSection({ tripId }: { tripId: string }) {
         />
       </div>
 
-      {error && <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="mb-3 text-sm text-blush-700 dark:text-blush-300">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-plum-400">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-gray-500">Nothing uploaded yet for this trip.</p>
+        <p className="text-sm text-plum-400">Nothing uploaded yet for this trip.</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {items.map((item) => (
             <div
               key={item.id}
-              className="group relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
+              className="group relative overflow-hidden rounded-xl border border-blush-100 dark:border-plum-800"
             >
               {item.type === 'photo' || item.type === 'ticket' ? (
                 <img src={item.url} alt="" className="h-32 w-full object-cover" />
               ) : item.type === 'video' ? (
                 <video src={item.url} controls className="h-32 w-full object-cover" />
               ) : (
-                <div className="flex h-32 items-center justify-center bg-gray-50 p-2 dark:bg-gray-900">
+                <div className="flex h-32 items-center justify-center bg-blush-50 p-2 dark:bg-plum-900">
                   <audio src={item.url} controls className="w-full" />
                 </div>
               )}
-              <div className="flex items-center justify-between bg-white/90 px-2 py-1 text-xs dark:bg-gray-900/90">
+              <div className="flex items-center justify-between bg-white/90 px-2 py-1 text-xs text-plum-600 dark:bg-plum-900/90 dark:text-plum-200">
                 <span>{typeLabels[item.type]}</span>
                 <button
                   onClick={() => deleteMedia(item)}

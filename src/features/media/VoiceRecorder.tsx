@@ -38,19 +38,19 @@ export function VoiceRecorder({ onRecorded }: { onRecorded: (blob: Blob) => void
       {recording ? (
         <button
           onClick={stop}
-          className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+          className="flex items-center gap-2 rounded-full bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
         >
           <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> Stop recording
         </button>
       ) : (
         <button
           onClick={start}
-          className="rounded-lg border border-teal-600 px-3 py-2 text-sm font-medium text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+          className="rounded-full border border-blush-400 px-3 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
           🎙️ Record voice note
         </button>
       )}
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-blush-700 dark:text-blush-300">{error}</p>}
     </div>
   )
 }

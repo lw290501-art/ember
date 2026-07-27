@@ -5,18 +5,23 @@ export function Layout() {
   const { user, signOut } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-      <header className="border-b border-gray-200 dark:border-gray-800">
+    <div className="min-h-screen bg-cream text-plum-800 dark:bg-plum-950 dark:text-blush-50">
+      <header className="border-b border-blush-100 dark:border-plum-800">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <NavLink to="/trips" className="text-lg font-semibold">
+          <NavLink
+            to="/trips"
+            className="font-display text-xl font-semibold italic text-plum-800 dark:text-blush-50"
+          >
             🧳 Journal
           </NavLink>
           {user && (
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-5 text-sm">
               <NavLink
                 to="/trips"
                 className={({ isActive }) =>
-                  isActive ? 'font-medium text-teal-600 dark:text-teal-400' : 'text-gray-600 dark:text-gray-400'
+                  isActive
+                    ? 'font-medium text-blush-600 dark:text-blush-300'
+                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
                 }
               >
                 Trips
@@ -24,14 +29,16 @@ export function Layout() {
               <NavLink
                 to="/bucket-list"
                 className={({ isActive }) =>
-                  isActive ? 'font-medium text-teal-600 dark:text-teal-400' : 'text-gray-600 dark:text-gray-400'
+                  isActive
+                    ? 'font-medium text-blush-600 dark:text-blush-300'
+                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
                 }
               >
                 Bucket List
               </NavLink>
               <button
                 onClick={() => signOut()}
-                className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                className="text-plum-400 hover:text-plum-700 dark:text-plum-400 dark:hover:text-blush-200"
               >
                 Log out
               </button>

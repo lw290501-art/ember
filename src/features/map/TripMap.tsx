@@ -42,7 +42,7 @@ export function TripMap({ tripId }: { tripId: string }) {
 
   if (!MAPBOX_TOKEN) {
     return (
-      <p className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+      <p className="rounded-xl border border-lavender-200 bg-lavender-100 p-4 text-sm text-plum-600 dark:border-plum-700 dark:bg-plum-800 dark:text-lavender-200">
         Map disabled: add VITE_MAPBOX_TOKEN to your .env file to enable pinning
         places on the map.
       </p>
@@ -53,7 +53,7 @@ export function TripMap({ tripId }: { tripId: string }) {
 
   return (
     <div>
-      <div className="mb-3 h-96 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="mb-3 h-96 overflow-hidden rounded-2xl border border-blush-100 dark:border-plum-800">
         <Map
           mapboxAccessToken={MAPBOX_TOKEN}
           initialViewState={{
@@ -82,32 +82,32 @@ export function TripMap({ tripId }: { tripId: string }) {
         </Map>
       </div>
 
-      <p className="mb-3 text-xs text-gray-500">Click anywhere on the map to drop a pin.</p>
+      <p className="mb-3 text-xs text-plum-400">Click anywhere on the map to drop a pin.</p>
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading pins…</p>
+        <p className="text-sm text-plum-400">Loading pins…</p>
       ) : pins.length === 0 ? (
-        <p className="text-sm text-gray-500">No pins yet for this trip.</p>
+        <p className="text-sm text-plum-400">No pins yet for this trip.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {pins.map((pin) => (
             <li
               key={pin.id}
-              className={`flex items-start gap-3 rounded-lg border p-3 ${
+              className={`flex items-start gap-3 rounded-xl border bg-white p-3 dark:bg-plum-900 ${
                 selectedPinId === pin.id
-                  ? 'border-teal-400 dark:border-teal-600'
-                  : 'border-gray-200 dark:border-gray-800'
+                  ? 'border-blush-400 dark:border-blush-500'
+                  : 'border-blush-100 dark:border-plum-800'
               }`}
             >
               <div className="flex-1">
-                <p className="font-medium">{pin.label}</p>
-                {pin.notes && <p className="text-sm text-gray-600 dark:text-gray-400">{pin.notes}</p>}
-                {pin.visited_at && <p className="text-xs text-gray-500">Visited {pin.visited_at}</p>}
+                <p className="font-medium text-plum-800 dark:text-blush-50">{pin.label}</p>
+                {pin.notes && <p className="text-sm text-plum-500 dark:text-plum-300">{pin.notes}</p>}
+                {pin.visited_at && <p className="text-xs text-plum-400">Visited {pin.visited_at}</p>}
               </div>
               <div className="flex shrink-0 gap-2 text-sm">
                 <button
                   onClick={() => setEditingPin(pin)}
-                  className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="text-plum-400 hover:text-plum-700 dark:hover:text-blush-200"
                 >
                   Edit
                 </button>

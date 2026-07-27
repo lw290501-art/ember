@@ -52,42 +52,44 @@ export function BucketListSection({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-lg font-semibold text-plum-800 dark:text-blush-50">
+          {title}
+        </h2>
         <button
           onClick={() => {
             setEditingItem(undefined)
             setShowForm(true)
           }}
-          className="rounded-lg border border-teal-600 px-3 py-1.5 text-sm font-medium text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+          className="rounded-full border border-blush-400 px-3 py-1.5 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
           + Add
         </button>
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-plum-400">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-gray-500">Nothing here yet.</p>
+        <p className="text-sm text-plum-400">Nothing here yet.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-800"
+              className="flex items-start gap-3 rounded-xl border border-blush-100 bg-white p-3 dark:border-plum-800 dark:bg-plum-900"
             >
               <input
                 type="checkbox"
                 checked={item.is_done}
                 onChange={() => toggleDone(item)}
-                className="mt-1 h-4 w-4 accent-teal-600"
+                className="mt-1 h-4 w-4 accent-blush-500"
               />
               <div className="flex-1">
-                <p className={item.is_done ? 'text-gray-400 line-through' : 'font-medium'}>
+                <p className={item.is_done ? 'text-plum-300 line-through' : 'font-medium text-plum-800 dark:text-blush-50'}>
                   {item.place_name}
-                  {item.country && <span className="text-gray-500"> · {item.country}</span>}
+                  {item.country && <span className="text-plum-400"> · {item.country}</span>}
                 </p>
                 {item.notes && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{item.notes}</p>
+                  <p className="text-sm text-plum-500 dark:text-plum-300">{item.notes}</p>
                 )}
               </div>
               <div className="flex shrink-0 gap-2 text-sm">
@@ -96,7 +98,7 @@ export function BucketListSection({
                     setEditingItem(item)
                     setShowForm(true)
                   }}
-                  className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="text-plum-400 hover:text-plum-700 dark:hover:text-blush-200"
                 >
                   Edit
                 </button>
