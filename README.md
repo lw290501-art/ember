@@ -1,4 +1,6 @@
-# Travel Journal
+# Ember
+
+*Every memory starts as a spark.*
 
 Plan trips, keep a travel bucket list, pin places on a map, and upload photos,
 videos, voice notes, and tickets for each trip.

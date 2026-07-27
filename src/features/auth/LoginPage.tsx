@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
+import { Logo } from '../../components/Logo'
 
 export function LoginPage() {
   const { signIn } = useAuth()
@@ -25,9 +26,15 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center px-4">
-      <h1 className="mb-6 font-display text-3xl font-semibold text-plum-800 dark:text-blush-50">
-        Log in
-      </h1>
+      <div className="mb-6 flex flex-col items-center text-center">
+        <Logo size={48} />
+        <h1 className="mt-3 font-display text-3xl font-semibold text-plum-800 dark:text-blush-50">
+          Log in
+        </h1>
+        <p className="mt-1 font-display text-sm italic text-plum-400 dark:text-plum-300">
+          every memory starts as a spark
+        </p>
+      </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="email"

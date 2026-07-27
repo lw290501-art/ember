@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
+import { Logo } from './Logo'
 
 export function Layout() {
   const { user, signOut } = useAuth()
@@ -10,9 +11,10 @@ export function Layout() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <NavLink
             to="/trips"
-            className="font-display text-xl font-semibold italic text-plum-800 dark:text-blush-50"
+            className="flex items-center gap-2 font-display text-xl font-semibold italic text-plum-800 dark:text-blush-50"
           >
-            🧳 Journal
+            <Logo size={32} />
+            Ember
           </NavLink>
           {user && (
             <div className="flex items-center gap-5 text-sm">
