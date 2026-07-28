@@ -6,6 +6,7 @@ import { TripFormModal } from './TripFormModal'
 import { BucketListSection } from '../bucketList/BucketListSection'
 import { TripMap } from '../map/TripMap'
 import { MediaSection } from '../media/MediaSection'
+import { FlightsSection } from '../flights/FlightsSection'
 
 const statusColors: Record<Trip['status'], string> = {
   planning: 'bg-lavender-100 text-plum-600 dark:bg-plum-800 dark:text-lavender-200',
@@ -87,6 +88,7 @@ export function TripDetailPage() {
 
       <BucketListSection tripId={trip.id} title="Bucket list for this trip" />
       <TripMap tripId={trip.id} />
+      <FlightsSection tripId={trip.id} />
       <MediaSection tripId={trip.id} />
 
       {showEdit && (

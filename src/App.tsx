@@ -7,6 +7,7 @@ import { SignupPage } from './features/auth/SignupPage'
 import { TripsListPage } from './features/trips/TripsListPage'
 import { TripDetailPage } from './features/trips/TripDetailPage'
 import { BucketListPage } from './features/bucketList/BucketListPage'
+import { StatsPage } from './features/stats/StatsPage'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
               <Route path="/trips" element={<TripsListPage />} />
               <Route path="/trips/:tripId" element={<TripDetailPage />} />
               <Route path="/bucket-list" element={<BucketListPage />} />
+              <Route path="/stats" element={<StatsPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/trips" replace />} />

@@ -40,6 +40,8 @@ export type Pin = {
   label: string
   notes: string | null
   visited_at: string | null
+  country: string | null
+  city: string | null
   created_at: string
 }
 
@@ -51,6 +53,18 @@ export type Media = {
   storage_path: string
   caption: string | null
   taken_at: string | null
+  created_at: string
+}
+
+export type Flight = {
+  id: string
+  trip_id: string
+  airline: string | null
+  flight_number: string | null
+  from_airport: string
+  to_airport: string
+  date: string | null
+  notes: string | null
   created_at: string
 }
 
@@ -88,6 +102,12 @@ export type Database = {
         Row: Media
         Insert: Omit<Media, 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Omit<Media, 'id' | 'trip_id'>>
+        Relationships: []
+      }
+      flights: {
+        Row: Flight
+        Insert: Omit<Flight, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<Flight, 'id' | 'trip_id'>>
         Relationships: []
       }
     }

@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../../lib/supabase'
+import { reverseGeocode } from '../../lib/mapbox'
 import { Modal } from '../../components/Modal'
 import type { Pin } from '../../types/database'
 
@@ -19,11 +20,28 @@ export function PinFormModal({
   const [label, setLabel] = useState(pin?.label ?? '')
   const [notes, setNotes] = useState(pin?.notes ?? '')
   const [visitedAt, setVisitedAt] = useState(pin?.visited_at ?? '')
+  const [country, setCountry] = useState(pin?.country ?? '')
+  const [city, setCity] = useState(pin?.city ?? '')
+  const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const lat = pin?.lat ?? coords?.lat
   const lng = pin?.lng ?? coords?.lng
+
+  // Prefill country/city from the dropped coordinates so users don't have to
+  // type them in — only for brand-new pins, never overwriting an edit.
+  useEffect(() => {
+    if (pin || lat === undefined || lng === undefined) return
+    setLocating(true)
+    reverseGeocode(lat, lng)
+      .then(({ country, city }) => {
+        if (country) setCountry(country)
+        if (city) setCity(city)
+      })
+      .finally(() => setLocating(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -31,7 +49,13 @@ export function PinFormModal({
     setSubmitting(true)
     setError(null)
 
-    const payload = { label, notes: notes || null, visited_at: visitedAt || null }
+    const payload = {
+      label,
+      notes: notes || null,
+      visited_at: visitedAt || null,
+      country: country || null,
+      city: city || null,
+    }
 
     const query = pin
       ? supabase.from('pins').update(payload).eq('id', pin.id).select().single()
@@ -73,6 +97,20 @@ export function PinFormModal({
           rows={3}
           className="rounded-xl border border-blush-200 bg-white px-3 py-2 text-plum-800 placeholder:text-plum-300 focus:border-blush-400 focus:outline-none focus:ring-2 focus:ring-blush-100 dark:border-plum-700 dark:bg-plum-800 dark:text-blush-50 dark:placeholder:text-plum-400"
         />
+        <div className="flex gap-3">
+          <input
+            placeholder={locating ? 'Finding country…' : 'Country'}
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="flex-1 rounded-xl border border-blush-200 bg-white px-3 py-2 text-plum-800 placeholder:text-plum-300 focus:border-blush-400 focus:outline-none focus:ring-2 focus:ring-blush-100 dark:border-plum-700 dark:bg-plum-800 dark:text-blush-50 dark:placeholder:text-plum-400"
+          />
+          <input
+            placeholder={locating ? 'Finding city…' : 'City'}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="flex-1 rounded-xl border border-blush-200 bg-white px-3 py-2 text-plum-800 placeholder:text-plum-300 focus:border-blush-400 focus:outline-none focus:ring-2 focus:ring-blush-100 dark:border-plum-700 dark:bg-plum-800 dark:text-blush-50 dark:placeholder:text-plum-400"
+          />
+        </div>
         <label className="text-sm">
           Visited on
           <input

@@ -100,7 +100,15 @@ export function TripMap({ tripId }: { tripId: string }) {
               }`}
             >
               <div className="flex-1">
-                <p className="font-medium text-plum-800 dark:text-blush-50">{pin.label}</p>
+                <p className="font-medium text-plum-800 dark:text-blush-50">
+                  {pin.label}
+                  {(pin.city || pin.country) && (
+                    <span className="font-normal text-plum-400">
+                      {' '}
+                      · {[pin.city, pin.country].filter(Boolean).join(', ')}
+                    </span>
+                  )}
+                </p>
                 {pin.notes && <p className="text-sm text-plum-500 dark:text-plum-300">{pin.notes}</p>}
                 {pin.visited_at && <p className="text-xs text-plum-400">Visited {pin.visited_at}</p>}
               </div>
