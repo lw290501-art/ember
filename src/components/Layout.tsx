@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 import { Logo } from './Logo'
+import { TabBar } from './TabBar'
 
 export function Layout() {
   const { user, signOut } = useAuth()
@@ -17,60 +18,19 @@ export function Layout() {
             Ember
           </NavLink>
           {user && (
-            <div className="flex items-center gap-5 text-sm">
-              <NavLink
-                to="/trips"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'font-medium text-blush-600 dark:text-blush-300'
-                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
-                }
-              >
-                Trips
-              </NavLink>
-              <NavLink
-                to="/bucket-list"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'font-medium text-blush-600 dark:text-blush-300'
-                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
-                }
-              >
-                Bucket List
-              </NavLink>
-              <NavLink
-                to="/stats"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'font-medium text-blush-600 dark:text-blush-300'
-                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
-                }
-              >
-                Stats
-              </NavLink>
-              <NavLink
-                to="/scrapbook"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'font-medium text-blush-600 dark:text-blush-300'
-                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
-                }
-              >
-                📖 My Travels
-              </NavLink>
-              <button
-                onClick={() => signOut()}
-                className="text-plum-400 hover:text-plum-700 dark:text-plum-400 dark:hover:text-blush-200"
-              >
-                Log out
-              </button>
-            </div>
+            <button
+              onClick={() => signOut()}
+              className="text-sm text-plum-400 hover:text-plum-700 dark:text-plum-400 dark:hover:text-blush-200"
+            >
+              Log out
+            </button>
           )}
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-6 pb-24">
         <Outlet />
       </main>
+      {user && <TabBar />}
     </div>
   )
 }
