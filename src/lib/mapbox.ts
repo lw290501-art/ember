@@ -33,3 +33,17 @@ export async function reverseGeocode(lat: number, lng: number): Promise<ReverseG
     return { country: null, city: null }
   }
 }
+
+/** Builds a static, colorful map image with a pin for each location, sized to fit them all. */
+export function buildStaticMapUrl(
+  pins: { lat: number; lng: number }[],
+  { width = 1000, height = 500 }: { width?: number; height?: number } = {},
+) {
+  if (!MAPBOX_TOKEN || pins.length === 0) return null
+
+  const markers = pins
+    .map((p) => `pin-s+c24770(${p.lng},${p.lat})`)
+    .join(',')
+
+  return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markers}/auto/${width}x${height}@2x?padding=40&access_token=${MAPBOX_TOKEN}`
+}

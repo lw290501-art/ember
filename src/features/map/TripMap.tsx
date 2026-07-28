@@ -53,18 +53,24 @@ export function TripMap({ tripId }: { tripId: string }) {
 
   return (
     <div>
-      <div className="mb-3 h-96 overflow-hidden rounded-2xl border border-blush-100 dark:border-plum-800">
+      <div className="map-frame mb-3 h-96 overflow-hidden rounded-2xl border-4 border-white shadow-md [&_.mapboxgl-canvas]:saturate-[1.35] [&_.mapboxgl-canvas]:contrast-[1.08] [&_.mapboxgl-canvas]:hue-rotate-[-3deg] dark:border-plum-800">
         <Map
           mapboxAccessToken={MAPBOX_TOKEN}
+          projection="mercator"
+          dragRotate={false}
+          pitchWithRotate={false}
+          touchPitch={false}
           initialViewState={{
             longitude: firstPin?.lng ?? 0,
             latitude: firstPin?.lat ?? 20,
             zoom: firstPin ? 8 : 1.5,
+            pitch: 0,
+            bearing: 0,
           }}
           mapStyle="mapbox://styles/mapbox/streets-v12"
           onClick={handleMapClick}
         >
-          <NavigationControl position="top-left" />
+          <NavigationControl position="top-left" showCompass={false} />
           {pins.map((pin) => (
             <Marker
               key={pin.id}

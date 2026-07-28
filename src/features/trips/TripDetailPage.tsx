@@ -70,6 +70,12 @@ export function TripDetailPage() {
             )}
           </div>
           <div className="flex gap-2 text-sm">
+            <Link
+              to={`/trips/${trip.id}/scrapbook`}
+              className="rounded-full border border-blush-400 px-3 py-1.5 font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+            >
+              📖 Scrapbook
+            </Link>
             <button
               onClick={() => setShowEdit(true)}
               className="rounded-full border border-blush-200 px-3 py-1.5 text-plum-600 hover:bg-blush-50 dark:border-plum-700 dark:text-blush-100 dark:hover:bg-plum-800"

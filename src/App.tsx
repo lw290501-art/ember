@@ -8,6 +8,7 @@ import { TripsListPage } from './features/trips/TripsListPage'
 import { TripDetailPage } from './features/trips/TripDetailPage'
 import { BucketListPage } from './features/bucketList/BucketListPage'
 import { StatsPage } from './features/stats/StatsPage'
+import { ScrapbookPage } from './features/scrapbook/ScrapbookPage'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/trips" element={<TripsListPage />} />
               <Route path="/trips/:tripId" element={<TripDetailPage />} />
+              <Route path="/trips/:tripId/scrapbook" element={<ScrapbookPage />} />
               <Route path="/bucket-list" element={<BucketListPage />} />
               <Route path="/stats" element={<StatsPage />} />
             </Route>
