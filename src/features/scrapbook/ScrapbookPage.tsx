@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
+import { useAuth } from '../auth/AuthContext'
 import { buildStaticMapUrl } from '../../lib/mapbox'
 import { exportElementToPdf } from '../../lib/exportPdf'
 import type { BucketListItem, Flight, Media, Pin, Trip } from '../../types/database'
+import { ScrapbookSwiper } from './ScrapbookSwiper'
+import { StickerOverlay, StickerPicker } from './Stickers'
 
 type ScrapbookData = {
   trip: Trip
@@ -13,74 +16,154 @@ type ScrapbookData = {
   photos: (Media & { url?: string })[]
 }
 
-const rotations = ['-rotate-3', 'rotate-2', '-rotate-1', 'rotate-3', '-rotate-2', 'rotate-1']
+const typeCaptions: Record<Media['type'], string> = {
+  photo: '📷',
+  ticket: '🎟️ Keepsake',
+  video: '🎬',
+  voice: '🎙️',
+}
+
+function EditableCaption({
+  value,
+  onSave,
+  placeholder,
+}: {
+  value: string
+  onSave: (next: string) => void
+  placeholder: string
+}) {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(value)
+
+  useEffect(() => setText(value), [value])
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={text}
+        placeholder={placeholder}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => {
+          setEditing(false)
+          if (text !== value) onSave(text)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur()
+        }}
+        className="mt-2 w-full rounded-lg border border-blush-200 bg-white px-2 py-1 text-center text-sm text-plum-700 focus:border-blush-400 focus:outline-none"
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      className="mt-2 w-full rounded-lg px-2 py-1 text-center text-sm italic text-plum-400 hover:bg-blush-50"
+    >
+      {value || placeholder}
+    </button>
+  )
+}
 
 export function ScrapbookPage() {
   const { tripId } = useParams<{ tripId: string }>()
+  const { user } = useAuth()
   const [data, setData] = useState<ScrapbookData | null>(null)
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
-  const pageRef = useRef<HTMLDivElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const exportRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const load = async () => {
+    if (!tripId) return
+    setLoading(true)
+
+    const [{ data: trip }, { data: pins }, { data: flights }, { data: doneItems }, { data: media }] =
+      await Promise.all([
+        supabase.from('trips').select('*').eq('id', tripId).single(),
+        supabase.from('pins').select('*').eq('trip_id', tripId).order('created_at', { ascending: true }),
+        supabase.from('flights').select('*').eq('trip_id', tripId).order('date', { ascending: true }),
+        supabase.from('bucket_list_items').select('*').eq('trip_id', tripId).eq('is_done', true),
+        supabase
+          .from('media')
+          .select('*')
+          .eq('trip_id', tripId)
+          .in('type', ['photo', 'ticket'])
+          .order('created_at', { ascending: true }),
+      ])
+
+    if (!trip) {
+      setData(null)
+      setLoading(false)
+      return
+    }
+
+    const mediaRows = media ?? []
+    let photos: (Media & { url?: string })[] = []
+    if (mediaRows.length > 0) {
+      const { data: signed } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .createSignedUrls(
+          mediaRows.map((m) => m.storage_path),
+          3600,
+        )
+      const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl ?? undefined]))
+      photos = mediaRows.map((m) => ({ ...m, url: urlByPath.get(m.storage_path) }))
+    }
+
+    setData({ trip, pins: pins ?? [], flights: flights ?? [], doneItems: doneItems ?? [], photos })
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const load = async () => {
-      if (!tripId) return
-      setLoading(true)
-
-      const [{ data: trip }, { data: pins }, { data: flights }, { data: doneItems }, { data: media }] =
-        await Promise.all([
-          supabase.from('trips').select('*').eq('id', tripId).single(),
-          supabase.from('pins').select('*').eq('trip_id', tripId).order('created_at', { ascending: true }),
-          supabase.from('flights').select('*').eq('trip_id', tripId).order('date', { ascending: true }),
-          supabase
-            .from('bucket_list_items')
-            .select('*')
-            .eq('trip_id', tripId)
-            .eq('is_done', true),
-          supabase
-            .from('media')
-            .select('*')
-            .eq('trip_id', tripId)
-            .in('type', ['photo', 'ticket'])
-            .order('created_at', { ascending: true }),
-        ])
-
-      if (!trip) {
-        setData(null)
-        setLoading(false)
-        return
-      }
-
-      const mediaRows = media ?? []
-      let photos: (Media & { url?: string })[] = []
-      if (mediaRows.length > 0) {
-        const { data: signed } = await supabase.storage
-          .from(MEDIA_BUCKET)
-          .createSignedUrls(
-            mediaRows.map((m) => m.storage_path),
-            3600,
-          )
-        const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl ?? undefined]))
-        photos = mediaRows.map((m) => ({ ...m, url: urlByPath.get(m.storage_path) }))
-      }
-
-      setData({
-        trip,
-        pins: pins ?? [],
-        flights: flights ?? [],
-        doneItems: doneItems ?? [],
-        photos,
-      })
-      setLoading(false)
-    }
     load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId])
 
+  const updateTripStickers = async (next: string[]) => {
+    if (!data) return
+    setData({ ...data, trip: { ...data.trip, cover_stickers: next } })
+    await supabase.from('trips').update({ cover_stickers: next }).eq('id', data.trip.id)
+  }
+
+  const updatePhoto = async (photoId: string, patch: Partial<Omit<Media, 'id' | 'trip_id'>>) => {
+    if (!data) return
+    setData({
+      ...data,
+      photos: data.photos.map((p) => (p.id === photoId ? { ...p, ...patch } : p)),
+    })
+    await supabase.from('media').update(patch).eq('id', photoId)
+  }
+
+  const handleAddPhoto = async (files: FileList | null) => {
+    if (!files || files.length === 0 || !user || !tripId) return
+    setUploading(true)
+    for (const file of Array.from(files)) {
+      const path = `${user.id}/${tripId}/${crypto.randomUUID()}-${file.name}`
+      const { error: uploadError } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file)
+      if (!uploadError) {
+        await supabase.from('media').insert({
+          trip_id: tripId,
+          pin_id: null,
+          type: 'photo',
+          storage_path: path,
+          caption: null,
+          taken_at: null,
+        })
+      }
+    }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    load()
+  }
+
   const handleExport = async () => {
-    if (!pageRef.current || !data) return
+    if (!exportRef.current || !data) return
     setExporting(true)
     try {
-      await exportElementToPdf(pageRef.current, `${data.trip.title.replace(/\s+/g, '-')}-scrapbook.pdf`)
+      await exportElementToPdf(exportRef.current, `${data.trip.title.replace(/\s+/g, '-')}-scrapbook.pdf`)
     } finally {
       setExporting(false)
     }
@@ -93,64 +176,47 @@ export function ScrapbookPage() {
   const mapUrl = buildStaticMapUrl(pins)
   const countries = [...new Set(pins.map((p) => p.country).filter((c): c is string => Boolean(c)))]
 
-  return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to={`/trips/${trip.id}`}
-          className="text-sm text-blush-600 hover:underline dark:text-blush-300"
-        >
-          ← Back to trip
-        </Link>
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="rounded-full bg-blush-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blush-700 disabled:opacity-60"
-        >
-          {exporting ? 'Preparing PDF…' : '⬇ Download as PDF'}
-        </button>
+  const slides: ReactNode[] = []
+
+  // Cover
+  slides.push(
+    <div className="relative flex h-full flex-col items-center justify-center text-center">
+      <StickerOverlay stickers={trip.cover_stickers} />
+      <p className="mb-2 font-display text-sm italic text-blush-600">every memory starts as a spark</p>
+      <h1 className="font-display text-4xl font-semibold text-plum-800">{trip.title}</h1>
+      {(trip.start_date || trip.end_date) && (
+        <p className="mt-2 text-plum-500">
+          {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
+        </p>
+      )}
+      {trip.description && <p className="mt-3 text-plum-600">{trip.description}</p>}
+      {countries.length > 0 && (
+        <p className="mt-4 text-sm uppercase tracking-wide text-plum-400">{countries.join(' · ')}</p>
+      )}
+      <div className="mt-6">
+        <StickerPicker value={trip.cover_stickers ?? []} onChange={updateTripStickers} />
       </div>
+    </div>,
+  )
 
-      <div
-        ref={pageRef}
-        className="mx-auto max-w-3xl rounded-2xl bg-cream p-10 text-plum-800 shadow-lg"
-      >
-        {/* Cover */}
-        <div className="mb-10 text-center">
-          <p className="mb-2 font-display text-sm italic text-blush-600">every memory starts as a spark</p>
-          <h1 className="font-display text-5xl font-semibold">{trip.title}</h1>
-          {(trip.start_date || trip.end_date) && (
-            <p className="mt-2 text-plum-500">
-              {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
-            </p>
-          )}
-          {trip.description && <p className="mt-3 text-plum-600">{trip.description}</p>}
-          {countries.length > 0 && (
-            <p className="mt-4 text-sm uppercase tracking-wide text-plum-400">
-              {countries.join(' · ')}
-            </p>
-          )}
-        </div>
-
-        {/* Map */}
+  // Map + places
+  if (mapUrl || pins.length > 0) {
+    slides.push(
+      <div>
         {mapUrl && (
-          <div className="mb-10">
-            <img
-              src={mapUrl}
-              alt="Map of trip locations"
-              crossOrigin="anonymous"
-              className="w-full rounded-2xl border-4 border-white shadow-md"
-            />
-          </div>
+          <img
+            src={mapUrl}
+            alt="Map of trip locations"
+            crossOrigin="anonymous"
+            className="mb-4 w-full rounded-xl border-4 border-white shadow-md"
+          />
         )}
-
-        {/* Pins */}
         {pins.length > 0 && (
-          <div className="mb-10">
-            <h2 className="mb-3 font-display text-2xl font-semibold">Places visited</h2>
-            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <>
+            <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Places visited</h2>
+            <ul className="flex flex-col gap-2">
               {pins.map((pin) => (
-                <li key={pin.id} className="rounded-xl bg-blush-50 px-3 py-2 text-sm">
+                <li key={pin.id} className="rounded-xl bg-blush-50 px-3 py-2 text-sm text-plum-800">
                   <span className="font-medium">{pin.label}</span>
                   {(pin.city || pin.country) && (
                     <span className="text-plum-400">
@@ -161,60 +227,125 @@ export function ScrapbookPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </>
         )}
+      </div>,
+    )
+  }
 
-        {/* Photos */}
-        {photos.length > 0 && (
-          <div className="mb-10">
-            <h2 className="mb-6 font-display text-2xl font-semibold">Snapshots</h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              {photos.map((photo, i) => (
-                <div
-                  key={photo.id}
-                  className={`w-40 rounded-sm bg-white p-2 pb-6 shadow-md ${rotations[i % rotations.length]}`}
-                >
-                  <img
-                    src={photo.url}
-                    alt=""
-                    crossOrigin="anonymous"
-                    className="h-36 w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+  // One slide per photo, editable
+  photos.forEach((photo) => {
+    slides.push(
+      <div className="flex h-full flex-col items-center justify-center">
+        <div className="relative w-full rounded-sm bg-white p-3 pb-8 shadow-md">
+          <StickerOverlay stickers={photo.stickers} />
+          <img src={photo.url} alt="" crossOrigin="anonymous" className="max-h-64 w-full object-cover" />
+        </div>
+        <p className="mt-1 text-xs text-plum-400">{typeCaptions[photo.type]}</p>
+        <EditableCaption
+          value={photo.caption ?? ''}
+          placeholder="Add a caption…"
+          onSave={(caption) => updatePhoto(photo.id, { caption })}
+        />
+        <div className="mt-3">
+          <StickerPicker
+            value={photo.stickers ?? []}
+            onChange={(next) => updatePhoto(photo.id, { stickers: next })}
+          />
+        </div>
+      </div>,
+    )
+  })
 
-        {/* Flights */}
-        {flights.length > 0 && (
-          <div className="mb-10">
-            <h2 className="mb-3 font-display text-2xl font-semibold">Flights</h2>
-            <ul className="flex flex-col gap-1 text-sm">
-              {flights.map((flight) => (
-                <li key={flight.id}>
-                  <span className="font-medium">
-                    {flight.from_airport} → {flight.to_airport}
-                  </span>
-                  {flight.airline && <span className="text-plum-400"> · {flight.airline}</span>}
-                  {flight.date && <span className="text-plum-400"> · {flight.date}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+  // Add photo slide
+  slides.push(
+    <div className="flex h-full flex-col items-center justify-center text-center">
+      <p className="mb-4 text-plum-500">Add another snapshot to this scrapbook</p>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60"
+      >
+        {uploading ? 'Uploading…' : '+ Add photo'}
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={(e) => handleAddPhoto(e.target.files)}
+        className="hidden"
+      />
+    </div>,
+  )
 
-        {/* Bucket list */}
-        {doneItems.length > 0 && (
-          <div>
-            <h2 className="mb-3 font-display text-2xl font-semibold">Bucket list, checked off</h2>
-            <ul className="flex flex-col gap-1 text-sm">
-              {doneItems.map((item) => (
-                <li key={item.id}>✓ {item.place_name}</li>
-              ))}
-            </ul>
+  // Flights
+  if (flights.length > 0) {
+    slides.push(
+      <div>
+        <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Flights</h2>
+        <ul className="flex flex-col gap-2 text-sm text-plum-800">
+          {flights.map((flight) => (
+            <li key={flight.id} className="rounded-xl bg-blush-50 px-3 py-2">
+              <span className="font-medium">
+                {flight.from_airport} → {flight.to_airport}
+              </span>
+              {flight.airline && <span className="text-plum-400"> · {flight.airline}</span>}
+              {flight.date && <span className="text-plum-400"> · {flight.date}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>,
+    )
+  }
+
+  // Bucket list
+  if (doneItems.length > 0) {
+    slides.push(
+      <div>
+        <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Bucket list, checked off</h2>
+        <ul className="flex flex-col gap-2 text-sm text-plum-800">
+          {doneItems.map((item) => (
+            <li key={item.id} className="rounded-xl bg-blush-50 px-3 py-2">
+              ✓ {item.place_name}
+            </li>
+          ))}
+        </ul>
+      </div>,
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <Link
+          to={`/trips/${trip.id}`}
+          className="text-sm text-blush-600 hover:underline dark:text-blush-300"
+        >
+          ← Back to trip
+        </Link>
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+        >
+          {exporting ? 'Preparing PDF…' : '⬇ Save as PDF to send'}
+        </button>
+      </div>
+
+      <ScrapbookSwiper slides={slides} />
+
+      {/* Off-screen full stack, used only to render the PDF export */}
+      <div
+        ref={exportRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[-9999px] top-0 w-[700px] rounded-2xl bg-cream p-10"
+      >
+        {slides.map((slide, i) => (
+          <div key={i} className="relative mb-10 border-b border-blush-100 pb-10 last:border-0">
+            {slide}
           </div>
-        )}
+        ))}
       </div>
     </div>
   )

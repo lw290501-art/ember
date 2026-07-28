@@ -16,6 +16,7 @@ export type Trip = {
   start_date: string | null
   end_date: string | null
   status: TripStatus
+  cover_stickers: string[] | null
   created_at: string
 }
 
@@ -53,6 +54,7 @@ export type Media = {
   storage_path: string
   caption: string | null
   taken_at: string | null
+  stickers: string[] | null
   created_at: string
 }
 
@@ -79,7 +81,11 @@ export type Database = {
     Tables: {
       trips: {
         Row: Trip
-        Insert: Omit<Trip, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Insert: Omit<Trip, 'id' | 'created_at' | 'cover_stickers'> & {
+          id?: string
+          created_at?: string
+          cover_stickers?: string[] | null
+        }
         Update: Partial<Omit<Trip, 'id' | 'user_id'>>
         Relationships: []
       }
@@ -100,7 +106,11 @@ export type Database = {
       }
       media: {
         Row: Media
-        Insert: Omit<Media, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Insert: Omit<Media, 'id' | 'created_at' | 'stickers'> & {
+          id?: string
+          created_at?: string
+          stickers?: string[] | null
+        }
         Update: Partial<Omit<Media, 'id' | 'trip_id'>>
         Relationships: []
       }

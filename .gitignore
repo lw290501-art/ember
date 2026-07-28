@@ -13,6 +13,7 @@ dist-ssr
 *.local
 .env
 .claude/scheduled_tasks.lock
+*-scrapbook.pdf
 
 # Editor directories and files
 .vscode/*

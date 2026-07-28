@@ -48,6 +48,16 @@ export function Layout() {
               >
                 Stats
               </NavLink>
+              <NavLink
+                to="/scrapbook"
+                className={({ isActive }) =>
+                  isActive
+                    ? 'font-medium text-blush-600 dark:text-blush-300'
+                    : 'text-plum-500 hover:text-plum-700 dark:text-plum-300 dark:hover:text-blush-200'
+                }
+              >
+                📖 My Travels
+              </NavLink>
               <button
                 onClick={() => signOut()}
                 className="text-plum-400 hover:text-plum-700 dark:text-plum-400 dark:hover:text-blush-200"

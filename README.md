@@ -23,7 +23,11 @@ npm install
    This creates the `trips`, `bucket_list_items`, `pins`, and `media` tables
    (with row-level security so each user only sees their own data) and the
    `trip-media` storage bucket used for uploads.
-4. By default new signups require email confirmation. For local testing you
+4. Then paste and run [`supabase/migrations/0002_flights_and_geo.sql`](supabase/migrations/0002_flights_and_geo.sql),
+   which adds the `flights` table and country/city columns on pins.
+5. Then paste and run [`supabase/migrations/0003_scrapbook_customization.sql`](supabase/migrations/0003_scrapbook_customization.sql),
+   which adds sticker/decoration columns for the scrapbook.
+6. By default new signups require email confirmation. For local testing you
    can disable that under **Authentication → Providers → Email → Confirm email**.
 
 ### 3. Create a Mapbox token (free)
@@ -54,16 +58,25 @@ npm run dev
 Without the keys above, the app still loads (auth/map calls just fail
 gracefully) — you need them for sign-up, trips, pins, and uploads to work.
 
-## What's here (MVP)
+## What's here
 
 - Email/password auth (Supabase Auth)
 - Create/edit/delete trips
 - Travel bucket list, optionally linked to a trip
-- Map with click-to-drop pins per trip (Mapbox)
+- Flat, colorful map with click-to-drop pins per trip (Mapbox), auto-tagged
+  with country/city via reverse geocoding
 - Photo/video/ticket upload and voice note recording per trip
+- Flight logging per trip
+- Stats page: countries/cities/flights/trips totals across all trips
+- Swipeable digital scrapbook per trip (drag/touch, arrows, dots, keyboard) —
+  cover, map, places, photos, flights, checked-off bucket list items — with
+  editable photo captions, toggleable sticker decorations, adding photos
+  directly from the scrapbook, and a "Save as PDF" export to send to friends
+- "My Travels" — an overall scrapbook aggregating stats and a card per trip
+  across your whole account, linking into each trip's own scrapbook
 
 ## Not yet built
 
-- Flight and country/city tracking
-- Digital scrapbook generation/export
-- Sharing trips or scrapbooks with friends
+- Live public web link sharing (currently sharing is export-and-send only,
+  by design — no backend changes needed, nothing about your trips is exposed
+  publicly)
