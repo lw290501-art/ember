@@ -7,6 +7,8 @@ import { exportElementToPdf } from '../../lib/exportPdf'
 import type { BucketListItem, Flight, Media, Pin, Trip } from '../../types/database'
 import { ScrapbookSwiper } from './ScrapbookSwiper'
 import { StickerOverlay, StickerPicker } from './Stickers'
+import { PassportStamp } from '../flights/PassportStamp'
+import { ScrapbookCanvas } from './canvas/ScrapbookCanvas'
 
 type ScrapbookData = {
   trip: Trip
@@ -199,6 +201,16 @@ export function ScrapbookPage() {
     </div>,
   )
 
+  // Freeform design-it-yourself page: drag photos and text anywhere
+  slides.push(
+    <div className="flex h-full flex-col">
+      <h2 className="mb-2 text-center font-display text-lg font-semibold text-plum-800">
+        Design this page
+      </h2>
+      {tripId && <ScrapbookCanvas tripId={tripId} />}
+    </div>,
+  )
+
   // Map + places
   if (mapUrl || pins.length > 0) {
     slides.push(
@@ -279,22 +291,16 @@ export function ScrapbookPage() {
     </div>,
   )
 
-  // Flights
+  // Flights, as passport stamps
   if (flights.length > 0) {
     slides.push(
       <div>
-        <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Flights</h2>
-        <ul className="flex flex-col gap-2 text-sm text-plum-800">
-          {flights.map((flight) => (
-            <li key={flight.id} className="rounded-xl bg-blush-50 px-3 py-2">
-              <span className="font-medium">
-                {flight.from_airport} → {flight.to_airport}
-              </span>
-              {flight.airline && <span className="text-plum-400"> · {flight.airline}</span>}
-              {flight.date && <span className="text-plum-400"> · {flight.date}</span>}
-            </li>
+        <h2 className="mb-4 font-display text-xl font-semibold text-plum-800">Passport</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          {flights.map((flight, i) => (
+            <PassportStamp key={flight.id} flight={flight} index={i} />
           ))}
-        </ul>
+        </div>
       </div>,
     )
   }

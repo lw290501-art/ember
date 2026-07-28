@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 export function Modal({
   title,
@@ -9,7 +10,7 @@ export function Modal({
   onClose: () => void
   children: ReactNode
 }) {
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-plum-900/40 px-4 backdrop-blur-sm"
       onClick={onClose}
@@ -32,6 +33,7 @@ export function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

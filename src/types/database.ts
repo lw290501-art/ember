@@ -70,6 +70,24 @@ export type Flight = {
   created_at: string
 }
 
+export type ScrapbookBlockType = 'photo' | 'text'
+
+export type ScrapbookBlock = {
+  id: string
+  trip_id: string
+  type: ScrapbookBlockType
+  media_id: string | null
+  text_content: string | null
+  font: string | null
+  color: string | null
+  x: number
+  y: number
+  width: number
+  rotation: number
+  z_index: number
+  created_at: string
+}
+
 // Minimal hand-written schema shape (in place of Supabase's generated types)
 // so the typed client (createClient<Database>) has row/insert/update shapes
 // to check against. Regenerate with `supabase gen types` once the project
@@ -118,6 +136,27 @@ export type Database = {
         Row: Flight
         Insert: Omit<Flight, 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Omit<Flight, 'id' | 'trip_id'>>
+        Relationships: []
+      }
+      scrapbook_blocks: {
+        Row: ScrapbookBlock
+        Insert: Omit<
+          ScrapbookBlock,
+          'id' | 'created_at' | 'x' | 'y' | 'width' | 'rotation' | 'z_index' | 'media_id' | 'text_content' | 'font' | 'color'
+        > & {
+          id?: string
+          created_at?: string
+          x?: number
+          y?: number
+          width?: number
+          rotation?: number
+          z_index?: number
+          media_id?: string | null
+          text_content?: string | null
+          font?: string | null
+          color?: string | null
+        }
+        Update: Partial<Omit<ScrapbookBlock, 'id' | 'trip_id'>>
         Relationships: []
       }
     }

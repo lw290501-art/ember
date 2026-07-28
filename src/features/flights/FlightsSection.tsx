@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { Flight } from '../../types/database'
 import { FlightFormModal } from './FlightFormModal'
+import { PassportStamp } from './PassportStamp'
 
 export function FlightsSection({ tripId }: { tripId: string }) {
   const [flights, setFlights] = useState<Flight[]>([])
@@ -35,7 +36,7 @@ export function FlightsSection({ tripId }: { tripId: string }) {
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-lg font-semibold text-plum-800 dark:text-blush-50">
-          Flights
+          Passport
         </h2>
         <button
           onClick={() => {
@@ -44,51 +45,38 @@ export function FlightsSection({ tripId }: { tripId: string }) {
           }}
           className="rounded-full border border-blush-400 px-3 py-1.5 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
-          + Add
+          + Add flight
         </button>
       </div>
 
       {loading ? (
         <p className="text-sm text-plum-400">Loading…</p>
       ) : flights.length === 0 ? (
-        <p className="text-sm text-plum-400">No flights logged for this trip yet.</p>
+        <p className="text-sm text-plum-400">No flights logged for this trip yet — collect your first stamp.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {flights.map((flight) => (
-            <li
-              key={flight.id}
-              className="flex items-start gap-3 rounded-xl border border-blush-100 bg-white p-3 dark:border-plum-800 dark:bg-plum-900"
-            >
-              <div className="flex-1">
-                <p className="font-medium text-plum-800 dark:text-blush-50">
-                  {flight.from_airport} → {flight.to_airport}
-                  {flight.airline && <span className="font-normal text-plum-400"> · {flight.airline}</span>}
-                  {flight.flight_number && (
-                    <span className="font-normal text-plum-400"> {flight.flight_number}</span>
-                  )}
-                </p>
-                {flight.notes && (
-                  <p className="text-sm text-plum-500 dark:text-plum-300">{flight.notes}</p>
-                )}
-                {flight.date && <p className="text-xs text-plum-400">{flight.date}</p>}
+        <div className="rounded-2xl border border-blush-100 bg-cream p-5 dark:border-plum-800 dark:bg-plum-900">
+          <div className="flex flex-wrap justify-center gap-4">
+            {flights.map((flight, i) => (
+              <div key={flight.id} className="group relative">
+                <PassportStamp flight={flight} index={i} />
+                <div className="absolute inset-x-0 -bottom-5 flex justify-center gap-2 text-xs opacity-0 transition group-hover:opacity-100">
+                  <button
+                    onClick={() => {
+                      setEditingFlight(flight)
+                      setShowForm(true)
+                    }}
+                    className="text-plum-400 hover:text-plum-700 dark:hover:text-blush-200"
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => deleteFlight(flight)} className="text-red-500 hover:text-red-700">
+                    Delete
+                  </button>
+                </div>
               </div>
-              <div className="flex shrink-0 gap-2 text-sm">
-                <button
-                  onClick={() => {
-                    setEditingFlight(flight)
-                    setShowForm(true)
-                  }}
-                  className="text-plum-400 hover:text-plum-700 dark:hover:text-blush-200"
-                >
-                  Edit
-                </button>
-                <button onClick={() => deleteFlight(flight)} className="text-red-500 hover:text-red-700">
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </div>
       )}
 
       {showForm && (
