@@ -3,10 +3,17 @@ import jsPDF from 'jspdf'
 
 /** Renders a DOM node to a multi-page A4 PDF and triggers a download. */
 export async function exportElementToPdf(el: HTMLElement, filename: string) {
+  // Pin the render window to the element's own size instead of trusting the
+  // browser's ambient window.innerWidth/innerHeight — those can be 0 (e.g. an
+  // unfocused/backgrounded tab), which makes html2canvas silently fail to
+  // find the cloned element.
+  const rect = el.getBoundingClientRect()
   const canvas = await html2canvas(el, {
     useCORS: true,
     scale: 2,
     backgroundColor: '#fdf6f2',
+    windowWidth: Math.max(document.documentElement.scrollWidth, Math.ceil(rect.right)),
+    windowHeight: Math.max(document.documentElement.scrollHeight, Math.ceil(rect.bottom)),
   })
 
   const imgData = canvas.toDataURL('image/jpeg', 0.92)

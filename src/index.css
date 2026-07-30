@@ -128,3 +128,27 @@ button:not(:disabled):active {
     animation: none !important;
   }
 }
+
+@keyframes country-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.country-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: country-pop 500ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .country-pop {
+    animation: none !important;
+  }
+}

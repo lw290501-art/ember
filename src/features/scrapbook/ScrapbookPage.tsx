@@ -3,13 +3,13 @@ import { Link, useParams } from 'react-router-dom'
 import { Camera, Download, Film, Mic, Ticket } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthContext'
-import { buildStaticMapUrl } from '../../lib/mapbox'
 import { exportElementToPdf } from '../../lib/exportPdf'
 import type { BucketListItem, Flight, Media, Pin, Trip } from '../../types/database'
 import { ScrapbookSwiper } from './ScrapbookSwiper'
 import { StickerOverlay, StickerPicker } from './Stickers'
 import { PassportStamp } from '../flights/PassportStamp'
 import { ScrapbookCanvas } from './canvas/ScrapbookCanvas'
+import { IllustratedWorldMap } from './IllustratedWorldMap'
 
 type ScrapbookData = {
   trip: Trip
@@ -176,157 +176,178 @@ export function ScrapbookPage() {
   if (!data) return <p className="text-plum-400">Trip not found.</p>
 
   const { trip, pins, flights, doneItems, photos } = data
-  const mapUrl = buildStaticMapUrl(pins)
   const countries = [...new Set(pins.map((p) => p.country).filter((c): c is string => Boolean(c)))]
 
-  const slides: ReactNode[] = []
+  // html2canvas (used for the PDF export) reliably chokes on the interactive
+  // world map's ~180 SVG paths, so the export-only copy gets a plain badge
+  // list instead — the live, on-screen version keeps the real map.
+  const buildSlides = (forExport: boolean): ReactNode[] => {
+    const built: ReactNode[] = []
 
-  // Cover
-  slides.push(
-    <div className="relative flex h-full flex-col items-center justify-center text-center">
-      <StickerOverlay stickers={trip.cover_stickers} />
-      <p className="mb-2 font-display text-sm italic text-blush-600">every memory starts as a spark</p>
-      <h1 className="font-display text-4xl font-semibold text-plum-800">{trip.title}</h1>
-      {(trip.start_date || trip.end_date) && (
-        <p className="mt-2 text-plum-500">
-          {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
-        </p>
-      )}
-      {trip.description && <p className="mt-3 text-plum-600">{trip.description}</p>}
-      {countries.length > 0 && (
-        <p className="mt-4 text-sm uppercase tracking-wide text-plum-400">{countries.join(' · ')}</p>
-      )}
-      <div className="mt-6">
-        <StickerPicker value={trip.cover_stickers ?? []} onChange={updateTripStickers} />
-      </div>
-    </div>,
-  )
-
-  // Freeform design-it-yourself page: drag photos and text anywhere
-  slides.push(
-    <div className="flex h-full flex-col">
-      <h2 className="mb-2 text-center font-display text-lg font-semibold text-plum-800">
-        Design this page
-      </h2>
-      {tripId && <ScrapbookCanvas tripId={tripId} />}
-    </div>,
-  )
-
-  // Map + places
-  if (mapUrl || pins.length > 0) {
-    slides.push(
-      <div>
-        {mapUrl && (
-          <img
-            src={mapUrl}
-            alt="Map of trip locations"
-            crossOrigin="anonymous"
-            className="mb-4 w-full rounded-xl border-4 border-white shadow-md"
-          />
+    // Cover
+    built.push(
+      <div className="relative flex h-full flex-col items-center justify-center text-center">
+        <StickerOverlay stickers={trip.cover_stickers} />
+        <p className="mb-2 font-display text-sm italic text-blush-600">every memory starts as a spark</p>
+        <h1 className="font-display text-4xl font-semibold text-plum-800">{trip.title}</h1>
+        {(trip.start_date || trip.end_date) && (
+          <p className="mt-2 text-plum-500">
+            {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
+          </p>
         )}
-        {pins.length > 0 && (
-          <>
-            <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Places visited</h2>
-            <ul className="flex flex-col gap-2">
-              {pins.map((pin) => (
-                <li key={pin.id} className="rounded-xl bg-blush-50 px-3 py-2 text-sm text-plum-800">
-                  <span className="font-medium">{pin.label}</span>
-                  {(pin.city || pin.country) && (
-                    <span className="text-plum-400">
-                      {' '}
-                      · {[pin.city, pin.country].filter(Boolean).join(', ')}
+        {trip.description && <p className="mt-3 text-plum-600">{trip.description}</p>}
+        {countries.length > 0 && (
+          <p className="mt-4 text-sm uppercase tracking-wide text-plum-400">{countries.join(' · ')}</p>
+        )}
+        <div className="mt-6">
+          <StickerPicker value={trip.cover_stickers ?? []} onChange={updateTripStickers} />
+        </div>
+      </div>,
+    )
+
+    // Freeform design-it-yourself page: drag photos and text anywhere.
+    // Skipped in the export copy — it fetches its own data async and mutates
+    // the DOM after mount, which breaks html2canvas mid-clone, and a
+    // drag-anywhere canvas doesn't translate to a static PDF page anyway.
+    if (!forExport) {
+      built.push(
+        <div className="flex h-full flex-col">
+          <h2 className="mb-2 text-center font-display text-lg font-semibold text-plum-800">
+            Design this page
+          </h2>
+          {tripId && <ScrapbookCanvas tripId={tripId} />}
+        </div>,
+      )
+    }
+
+    // Map + places
+    if (countries.length > 0 || pins.length > 0) {
+      built.push(
+        <div>
+          {countries.length > 0 && (
+            <div className="mb-4">
+              {forExport ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {countries.map((c) => (
+                    <span key={c} className="rounded-full bg-lavender-100 px-2.5 py-1 text-xs text-plum-600">
+                      {c}
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>,
-    )
-  }
+                  ))}
+                </div>
+              ) : (
+                <IllustratedWorldMap visitedCountries={countries} />
+              )}
+            </div>
+          )}
+          {pins.length > 0 && (
+            <>
+              <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Places visited</h2>
+              <ul className="flex flex-col gap-2">
+                {pins.map((pin) => (
+                  <li key={pin.id} className="rounded-xl bg-blush-50 px-3 py-2 text-sm text-plum-800">
+                    <span className="font-medium">{pin.label}</span>
+                    {(pin.city || pin.country) && (
+                      <span className="text-plum-400">
+                        {' '}
+                        · {[pin.city, pin.country].filter(Boolean).join(', ')}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>,
+      )
+    }
 
-  // One slide per photo, editable
-  photos.forEach((photo) => {
-    slides.push(
-      <div className="flex h-full flex-col items-center justify-center">
-        <div className="relative w-full rounded-sm bg-white p-3 pb-8 shadow-md">
-          <StickerOverlay stickers={photo.stickers} />
-          <img src={photo.url} alt="" crossOrigin="anonymous" className="max-h-64 w-full object-cover" />
-        </div>
-        <p className="mt-1 flex items-center gap-1 text-xs text-plum-400">
-          {(() => {
-            const Icon = typeMeta[photo.type].icon
-            return <Icon size={12} strokeWidth={2} />
-          })()}
-          {typeMeta[photo.type].label}
-        </p>
-        <EditableCaption
-          value={photo.caption ?? ''}
-          placeholder="Add a caption…"
-          onSave={(caption) => updatePhoto(photo.id, { caption })}
-        />
-        <div className="mt-3">
-          <StickerPicker
-            value={photo.stickers ?? []}
-            onChange={(next) => updatePhoto(photo.id, { stickers: next })}
+    // One slide per photo, editable
+    photos.forEach((photo) => {
+      built.push(
+        <div className="flex h-full flex-col items-center justify-center">
+          <div className="relative w-full rounded-sm bg-white p-3 pb-8 shadow-md">
+            <StickerOverlay stickers={photo.stickers} />
+            <img src={photo.url} alt="" crossOrigin="anonymous" className="max-h-64 w-full object-cover" />
+          </div>
+          <p className="mt-1 flex items-center gap-1 text-xs text-plum-400">
+            {(() => {
+              const Icon = typeMeta[photo.type].icon
+              return <Icon size={12} strokeWidth={2} />
+            })()}
+            {typeMeta[photo.type].label}
+          </p>
+          <EditableCaption
+            value={photo.caption ?? ''}
+            placeholder="Add a caption…"
+            onSave={(caption) => updatePhoto(photo.id, { caption })}
           />
-        </div>
+          <div className="mt-3">
+            <StickerPicker
+              value={photo.stickers ?? []}
+              onChange={(next) => updatePhoto(photo.id, { stickers: next })}
+            />
+          </div>
+        </div>,
+      )
+    })
+
+    // Add photo slide
+    built.push(
+      <div className="flex h-full flex-col items-center justify-center text-center">
+        <p className="mb-4 text-plum-500">Add another snapshot to this scrapbook</p>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60"
+        >
+          {uploading ? 'Uploading…' : '+ Add photo'}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => handleAddPhoto(e.target.files)}
+          className="hidden"
+        />
       </div>,
     )
-  })
 
-  // Add photo slide
-  slides.push(
-    <div className="flex h-full flex-col items-center justify-center text-center">
-      <p className="mb-4 text-plum-500">Add another snapshot to this scrapbook</p>
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60"
-      >
-        {uploading ? 'Uploading…' : '+ Add photo'}
-      </button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={(e) => handleAddPhoto(e.target.files)}
-        className="hidden"
-      />
-    </div>,
-  )
+    // Flights, as passport stamps
+    if (flights.length > 0) {
+      built.push(
+        <div>
+          <h2 className="mb-4 font-display text-xl font-semibold text-plum-800">Passport</h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            {flights.map((flight, i) => (
+              <PassportStamp key={flight.id} flight={flight} index={i} />
+            ))}
+          </div>
+        </div>,
+      )
+    }
 
-  // Flights, as passport stamps
-  if (flights.length > 0) {
-    slides.push(
-      <div>
-        <h2 className="mb-4 font-display text-xl font-semibold text-plum-800">Passport</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          {flights.map((flight, i) => (
-            <PassportStamp key={flight.id} flight={flight} index={i} />
-          ))}
-        </div>
-      </div>,
-    )
+    // Bucket list
+    if (doneItems.length > 0) {
+      built.push(
+        <div>
+          <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Bucket list, checked off</h2>
+          <ul className="flex flex-col gap-2 text-sm text-plum-800">
+            {doneItems.map((item) => (
+              <li key={item.id} className="rounded-xl bg-blush-50 px-3 py-2">
+                ✓ {item.place_name}
+              </li>
+            ))}
+          </ul>
+        </div>,
+      )
+    }
+
+    return built
   }
 
-  // Bucket list
-  if (doneItems.length > 0) {
-    slides.push(
-      <div>
-        <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Bucket list, checked off</h2>
-        <ul className="flex flex-col gap-2 text-sm text-plum-800">
-          {doneItems.map((item) => (
-            <li key={item.id} className="rounded-xl bg-blush-50 px-3 py-2">
-              ✓ {item.place_name}
-            </li>
-          ))}
-        </ul>
-      </div>,
-    )
-  }
+  const slides = buildSlides(false)
+  const exportSlides = buildSlides(true)
 
   return (
     <div>
@@ -355,7 +376,7 @@ export function ScrapbookPage() {
         aria-hidden="true"
         className="pointer-events-none absolute left-[-9999px] top-0 w-[700px] rounded-2xl bg-cream p-10"
       >
-        {slides.map((slide, i) => (
+        {exportSlides.map((slide, i) => (
           <div key={i} className="relative mb-10 border-b border-blush-100 pb-10 last:border-0">
             {slide}
           </div>

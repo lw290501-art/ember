@@ -27,7 +27,9 @@ npm install
    which adds the `flights` table and country/city columns on pins.
 5. Then paste and run [`supabase/migrations/0003_scrapbook_customization.sql`](supabase/migrations/0003_scrapbook_customization.sql),
    which adds sticker/decoration columns for the scrapbook.
-6. By default new signups require email confirmation. For local testing you
+6. Then paste and run [`supabase/migrations/0004_scrapbook_canvas.sql`](supabase/migrations/0004_scrapbook_canvas.sql),
+   which adds the `scrapbook_blocks` table backing the freeform design page.
+7. By default new signups require email confirmation. For local testing you
    can disable that under **Authentication → Providers → Email → Confirm email**.
 
 ### 3. Create a Mapbox token (free)
@@ -63,17 +65,20 @@ gracefully) — you need them for sign-up, trips, pins, and uploads to work.
 - Email/password auth (Supabase Auth)
 - Create/edit/delete trips
 - Travel bucket list, optionally linked to a trip
-- Flat, colorful map with click-to-drop pins per trip (Mapbox), auto-tagged
-  with country/city via reverse geocoding
+- Flat, colorful interactive map with click-to-drop pins per trip (Mapbox),
+  auto-tagged with country/city via reverse geocoding
 - Photo/video/ticket upload and voice note recording per trip
-- Flight logging per trip
+- Flight logging per trip, shown as collectible passport stamps
 - Stats page: countries/cities/flights/trips totals across all trips
 - Swipeable digital scrapbook per trip (drag/touch, arrows, dots, keyboard) —
-  cover, map, places, photos, flights, checked-off bucket list items — with
-  editable photo captions, toggleable sticker decorations, adding photos
+  cover, a flat illustrated world map (visited countries highlight and pop on
+  hover), places, photos, passport stamps, checked-off bucket list items — with
+  editable photo captions, toggleable sticker decorations, a freeform "design
+  this page" canvas (drag photos/custom-font text anywhere), adding photos
   directly from the scrapbook, and a "Save as PDF" export to send to friends
-- "My Travels" — an overall scrapbook aggregating stats and a card per trip
-  across your whole account, linking into each trip's own scrapbook
+- "My Travels" — an overall scrapbook aggregating stats and an illustrated
+  world map across your whole account, plus a card per trip linking into each
+  trip's own scrapbook
 
 ## Not yet built
 

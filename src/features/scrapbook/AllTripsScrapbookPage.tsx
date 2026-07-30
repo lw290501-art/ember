@@ -2,9 +2,9 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Luggage } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
-import { buildStaticMapUrl } from '../../lib/mapbox'
-import type { Pin, Trip } from '../../types/database'
+import type { Trip } from '../../types/database'
 import { ScrapbookSwiper } from './ScrapbookSwiper'
+import { IllustratedWorldMap } from './IllustratedWorldMap'
 
 type TripCard = {
   trip: Trip
@@ -14,7 +14,6 @@ type TripCard = {
 
 type OverviewData = {
   trips: TripCard[]
-  allPins: Pin[]
   countries: string[]
   cities: string[]
   flightsCount: number
@@ -75,7 +74,7 @@ export function AllTripsScrapbookPage() {
         }),
       )
 
-      setData({ trips: tripCards, allPins: pins, countries, cities, flightsCount: flightsCount ?? 0 })
+      setData({ trips: tripCards, countries, cities, flightsCount: flightsCount ?? 0 })
       setLoading(false)
     }
     load()
@@ -83,7 +82,6 @@ export function AllTripsScrapbookPage() {
 
   if (loading || !data) return <p className="text-plum-400">Loading…</p>
 
-  const mapUrl = buildStaticMapUrl(data.allPins)
   const slides: ReactNode[] = []
 
   // Cover
@@ -113,16 +111,11 @@ export function AllTripsScrapbookPage() {
   )
 
   // Overall map
-  if (mapUrl) {
+  if (data.countries.length > 0) {
     slides.push(
       <div>
         <h2 className="mb-3 font-display text-xl font-semibold text-plum-800">Everywhere I've been</h2>
-        <img
-          src={mapUrl}
-          alt="Map of all trip locations"
-          crossOrigin="anonymous"
-          className="w-full rounded-xl border-4 border-white shadow-md"
-        />
+        <IllustratedWorldMap visitedCountries={data.countries} />
         {data.countries.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
             {data.countries.map((c) => (
