@@ -37,6 +37,10 @@ npm install
 1. Sign up at [mapbox.com](https://mapbox.com).
 2. Copy the default public token from your [account page](https://account.mapbox.com).
 
+Note: the maps themselves are a flat illustrated world SVG, not Mapbox tiles —
+the token is only used for reverse geocoding (turning a clicked point into a
+country/city name).
+
 ### 4. Configure environment variables
 
 ```bash
@@ -65,8 +69,9 @@ gracefully) — you need them for sign-up, trips, pins, and uploads to work.
 - Email/password auth (Supabase Auth)
 - Create/edit/delete trips
 - Travel bucket list, optionally linked to a trip
-- Flat, colorful interactive map with click-to-drop pins per trip (Mapbox),
-  auto-tagged with country/city via reverse geocoding
+- Flat illustrated world map per trip — click anywhere to drop a pin
+  (auto-tagged with country/city via reverse geocoding), zooms to the trip's
+  own pins once it has any, and visited countries highlight and pop on hover
 - Photo/video/ticket upload and voice note recording per trip
 - Flight logging per trip, shown as collectible passport stamps
 - Stats page: countries/cities/flights/trips totals across all trips

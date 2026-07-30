@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import type { Trip } from '../../types/database'
 import { TripFormModal } from './TripFormModal'
 import { BucketListSection } from '../bucketList/BucketListSection'
-import { TripMap } from '../map/TripMap'
+import { IllustratedTripMap } from '../map/IllustratedTripMap'
 import { MediaSection } from '../media/MediaSection'
 import { FlightsSection } from '../flights/FlightsSection'
 
@@ -95,7 +95,7 @@ export function TripDetailPage() {
       </div>
 
       <BucketListSection tripId={trip.id} title="Bucket list for this trip" />
-      <TripMap tripId={trip.id} />
+      <IllustratedTripMap tripId={trip.id} />
       <FlightsSection tripId={trip.id} />
       <MediaSection tripId={trip.id} />
 
