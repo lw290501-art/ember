@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Mic } from 'lucide-react'
 
 export function VoiceRecorder({ onRecorded }: { onRecorded: (blob: Blob) => void }) {
   const [recording, setRecording] = useState(false)
@@ -45,9 +46,9 @@ export function VoiceRecorder({ onRecorded }: { onRecorded: (blob: Blob) => void
       ) : (
         <button
           onClick={start}
-          className="rounded-full border border-blush-400 px-3 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+          className="flex items-center gap-2 rounded-full border border-blush-400 px-3 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
-          🎙️ Record voice note
+          <Mic size={16} strokeWidth={2} /> Record voice note
         </button>
       )}
       {error && <p className="text-sm text-blush-700 dark:text-blush-300">{error}</p>}

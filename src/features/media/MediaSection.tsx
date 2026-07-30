@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
+import { Camera, Film, Mic, Ticket, Upload } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthContext'
 import type { Media, MediaType } from '../../types/database'
 import { VoiceRecorder } from './VoiceRecorder'
 
-const typeLabels: Record<MediaType, string> = {
-  photo: '📷 Photo',
-  video: '🎬 Video',
-  voice: '🎙️ Voice note',
-  ticket: '🎟️ Ticket',
+const typeMeta: Record<MediaType, { icon: typeof Camera; label: string }> = {
+  photo: { icon: Camera, label: 'Photo' },
+  video: { icon: Film, label: 'Video' },
+  voice: { icon: Mic, label: 'Voice note' },
+  ticket: { icon: Ticket, label: 'Ticket' },
 }
 
 export function MediaSection({ tripId }: { tripId: string }) {
@@ -121,7 +122,8 @@ export function MediaSection({ tripId }: { tripId: string }) {
           disabled={uploading}
           className="rounded-full border border-blush-400 px-3 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
-          {uploading ? 'Uploading…' : '+ Upload files'}
+          <Upload size={16} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+          {uploading ? 'Uploading…' : 'Upload files'}
         </button>
         <input
           ref={fileInputRef}
@@ -159,7 +161,13 @@ export function MediaSection({ tripId }: { tripId: string }) {
                 </div>
               )}
               <div className="flex items-center justify-between bg-white/90 px-2 py-1 text-xs text-plum-600 dark:bg-plum-900/90 dark:text-plum-200">
-                <span>{typeLabels[item.type]}</span>
+                <span className="flex items-center gap-1">
+                  {(() => {
+                    const Icon = typeMeta[item.type].icon
+                    return <Icon size={13} strokeWidth={2} />
+                  })()}
+                  {typeMeta[item.type].label}
+                </span>
                 <button
                   onClick={() => deleteMedia(item)}
                   className="text-red-500 opacity-0 group-hover:opacity-100"

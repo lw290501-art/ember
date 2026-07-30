@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
+import { Luggage, NotebookPen, BarChart3, BookOpen } from 'lucide-react'
 
 const tabs = [
-  { to: '/trips', icon: '🧳', label: 'Trips' },
-  { to: '/bucket-list', icon: '📝', label: 'Bucket List' },
-  { to: '/stats', icon: '📊', label: 'Stats' },
-  { to: '/scrapbook', icon: '📖', label: 'My Travels' },
+  { to: '/trips', icon: Luggage, label: 'Trips' },
+  { to: '/bucket-list', icon: NotebookPen, label: 'Bucket List' },
+  { to: '/stats', icon: BarChart3, label: 'Stats' },
+  { to: '/scrapbook', icon: BookOpen, label: 'My Travels' },
 ]
 
 export function TabBar() {
@@ -29,11 +30,11 @@ export function TabBar() {
             {({ isActive }) => (
               <>
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-base transition ${
-                    isActive ? 'bg-blush-100 dark:bg-plum-800' : ''
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 ${
+                    isActive ? 'scale-110 bg-blush-100 dark:bg-plum-800' : 'scale-100'
                   }`}
                 >
-                  {tab.icon}
+                  <tab.icon size={18} strokeWidth={2} />
                 </span>
                 {tab.label}
               </>

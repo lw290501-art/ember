@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { MapPin } from 'lucide-react'
 import Map, { Marker, NavigationControl, type MapMouseEvent } from 'react-map-gl/mapbox'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { supabase } from '../../lib/supabase'
@@ -82,7 +83,9 @@ export function TripMap({ tripId }: { tripId: string }) {
                 setSelectedPinId(pin.id === selectedPinId ? null : pin.id)
               }}
             >
-              <div className="cursor-pointer text-2xl leading-none drop-shadow">📍</div>
+              <div className="cursor-pointer text-blush-600 drop-shadow-md transition-transform hover:scale-125 dark:text-blush-400">
+                <MapPin size={30} strokeWidth={2} fill="currentColor" stroke="white" />
+              </div>
             </Marker>
           ))}
         </Map>

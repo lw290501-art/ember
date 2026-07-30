@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Camera, Download, Film, Mic, Ticket } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthContext'
 import { buildStaticMapUrl } from '../../lib/mapbox'
@@ -18,11 +19,11 @@ type ScrapbookData = {
   photos: (Media & { url?: string })[]
 }
 
-const typeCaptions: Record<Media['type'], string> = {
-  photo: '📷',
-  ticket: '🎟️ Keepsake',
-  video: '🎬',
-  voice: '🎙️',
+const typeMeta: Record<Media['type'], { icon: typeof Camera; label: string }> = {
+  photo: { icon: Camera, label: '' },
+  ticket: { icon: Ticket, label: 'Keepsake' },
+  video: { icon: Film, label: '' },
+  voice: { icon: Mic, label: '' },
 }
 
 function EditableCaption({
@@ -253,7 +254,13 @@ export function ScrapbookPage() {
           <StickerOverlay stickers={photo.stickers} />
           <img src={photo.url} alt="" crossOrigin="anonymous" className="max-h-64 w-full object-cover" />
         </div>
-        <p className="mt-1 text-xs text-plum-400">{typeCaptions[photo.type]}</p>
+        <p className="mt-1 flex items-center gap-1 text-xs text-plum-400">
+          {(() => {
+            const Icon = typeMeta[photo.type].icon
+            return <Icon size={12} strokeWidth={2} />
+          })()}
+          {typeMeta[photo.type].label}
+        </p>
         <EditableCaption
           value={photo.caption ?? ''}
           placeholder="Add a caption…"
@@ -333,9 +340,10 @@ export function ScrapbookPage() {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+          className="flex items-center gap-1.5 rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
         >
-          {exporting ? 'Preparing PDF…' : '⬇ Save as PDF to send'}
+          <Download size={16} strokeWidth={2} />
+          {exporting ? 'Preparing PDF…' : 'Save as PDF to send'}
         </button>
       </div>
 

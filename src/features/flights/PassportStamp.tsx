@@ -1,3 +1,4 @@
+import { Plane } from 'lucide-react'
 import type { Flight } from '../../types/database'
 
 const stampRotations = [-7, 5, -4, 8, -9, 3, 6, -5, 4, -6]
@@ -14,7 +15,7 @@ export function PassportStamp({ flight, index }: { flight: Flight; index: number
     >
       <div className="absolute inset-[5px] rounded-full border border-current opacity-60" />
       <p className="text-[11px] font-bold uppercase leading-tight tracking-wide">{flight.from_airport}</p>
-      <p className="text-[9px] leading-none">✈</p>
+      <Plane size={12} strokeWidth={2} className="my-0.5 rotate-45" />
       <p className="text-[11px] font-bold uppercase leading-tight tracking-wide">{flight.to_airport}</p>
       {flight.date && <p className="mt-0.5 text-[7px] uppercase leading-none opacity-80">{flight.date}</p>}
     </div>

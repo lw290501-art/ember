@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { BookOpen } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Trip } from '../../types/database'
 import { TripFormModal } from './TripFormModal'
@@ -72,9 +73,10 @@ export function TripDetailPage() {
           <div className="flex gap-2 text-sm">
             <Link
               to={`/trips/${trip.id}/scrapbook`}
-              className="rounded-full border border-blush-400 px-3 py-1.5 font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+              className="flex items-center gap-1.5 rounded-full border border-blush-400 px-3 py-1.5 font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
             >
-              📖 Scrapbook
+              <BookOpen size={16} strokeWidth={2} />
+              Scrapbook
             </Link>
             <button
               onClick={() => setShowEdit(true)}

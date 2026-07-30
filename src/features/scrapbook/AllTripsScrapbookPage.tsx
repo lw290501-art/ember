@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { Luggage } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { buildStaticMapUrl } from '../../lib/mapbox'
 import type { Pin, Trip } from '../../types/database'
@@ -144,8 +145,8 @@ export function AllTripsScrapbookPage() {
             <img src={thumbnailUrl} alt="" crossOrigin="anonymous" className="h-40 w-full object-cover" />
           </div>
         ) : (
-          <div className="flex h-40 w-full items-center justify-center rounded-xl bg-blush-50 text-3xl">
-            🧳
+          <div className="flex h-40 w-full items-center justify-center rounded-xl bg-blush-50 text-blush-300">
+            <Luggage size={40} strokeWidth={1.5} />
           </div>
         )}
         <h2 className="mt-4 font-display text-2xl font-semibold text-plum-800">{trip.title}</h2>
