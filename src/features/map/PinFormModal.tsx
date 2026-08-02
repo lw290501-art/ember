@@ -8,16 +8,18 @@ export function PinFormModal({
   tripId,
   pin,
   coords,
+  initialLabel,
   onClose,
   onSaved,
 }: {
   tripId: string
   pin?: Pin
   coords?: { lat: number; lng: number }
+  initialLabel?: string
   onClose: () => void
   onSaved: (pin: Pin) => void
 }) {
-  const [label, setLabel] = useState(pin?.label ?? '')
+  const [label, setLabel] = useState(pin?.label ?? initialLabel ?? '')
   const [notes, setNotes] = useState(pin?.notes ?? '')
   const [visitedAt, setVisitedAt] = useState(pin?.visited_at ?? '')
   const [country, setCountry] = useState(pin?.country ?? '')

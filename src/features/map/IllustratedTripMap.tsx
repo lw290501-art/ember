@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { normalizeCountryName, useWorldCountries } from '../../lib/worldMap'
 import type { Pin } from '../../types/database'
 import { PinFormModal } from './PinFormModal'
+import { PlaceSearch } from './PlaceSearch'
 
 const WIDTH = 800
 const HEIGHT = 420
@@ -14,6 +15,7 @@ export function IllustratedTripMap({ tripId }: { tripId: string }) {
   const [loading, setLoading] = useState(true)
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null)
   const [pendingCoords, setPendingCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [pendingLabel, setPendingLabel] = useState<string | undefined>()
   const [editingPin, setEditingPin] = useState<Pin | undefined>()
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null)
 
@@ -99,12 +101,18 @@ export function IllustratedTripMap({ tripId }: { tripId: string }) {
     const coords = projection.invert?.([x, y])
     if (!coords) return
     const [lng, lat] = coords
+    setPendingLabel(undefined)
     setPendingCoords({ lat, lng })
+  }
+
+  const handleSelectPlace = (place: { name: string; lat: number; lng: number }) => {
+    setPendingLabel(place.name)
+    setPendingCoords({ lat: place.lat, lng: place.lng })
   }
 
   if (!countries) {
     return (
-      <div className="flex aspect-[800/420] w-full items-center justify-center rounded-2xl border-4 border-white bg-lavender-50 dark:border-plum-800 dark:bg-plum-900">
+      <div className="flex h-72 w-full items-center justify-center rounded-2xl border-4 border-white bg-lavender-50 dark:border-plum-800 dark:bg-plum-900 sm:h-96">
         <p className="text-sm text-plum-400">Loading map…</p>
       </div>
     )
@@ -112,10 +120,13 @@ export function IllustratedTripMap({ tripId }: { tripId: string }) {
 
   return (
     <div>
-      <div className="map-frame mb-3 overflow-hidden rounded-2xl border-4 border-white bg-lavender-50 shadow-md dark:border-plum-800 dark:bg-plum-900">
+      <PlaceSearch onSelect={handleSelectPlace} />
+
+      <div className="map-frame mb-3 h-72 overflow-hidden rounded-2xl border-4 border-white bg-lavender-50 shadow-md dark:border-plum-800 dark:bg-plum-900 sm:h-96">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-auto w-full cursor-crosshair"
+          preserveAspectRatio="xMidYMid meet"
+          className="h-full w-full cursor-crosshair"
           onClick={handleMapClick}
         >
           {countries.map((c) => {
@@ -172,7 +183,9 @@ export function IllustratedTripMap({ tripId }: { tripId: string }) {
         </svg>
       </div>
 
-      <p className="mb-3 text-xs text-plum-400">Click anywhere on the map to drop a pin.</p>
+      <p className="mb-3 text-xs text-plum-400">
+        Search above for an exact spot, or click anywhere on the map to drop a pin roughly there.
+      </p>
 
       {loading ? (
         <p className="text-sm text-plum-400">Loading pins…</p>
@@ -223,12 +236,15 @@ export function IllustratedTripMap({ tripId }: { tripId: string }) {
           tripId={tripId}
           pin={editingPin}
           coords={pendingCoords ?? undefined}
+          initialLabel={pendingLabel}
           onClose={() => {
             setPendingCoords(null)
+            setPendingLabel(undefined)
             setEditingPin(undefined)
           }}
           onSaved={() => {
             setPendingCoords(null)
+            setPendingLabel(undefined)
             setEditingPin(undefined)
             loadPins()
           }}
