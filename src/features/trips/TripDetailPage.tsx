@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, CalendarDays } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Trip } from '../../types/database'
 import { TripFormModal } from './TripFormModal'
@@ -8,6 +8,7 @@ import { BucketListSection } from '../bucketList/BucketListSection'
 import { IllustratedTripMap } from '../map/IllustratedTripMap'
 import { MediaSection } from '../media/MediaSection'
 import { FlightsSection } from '../flights/FlightsSection'
+import { formatDateRange } from '../../lib/formatDate'
 
 const statusColors: Record<Trip['status'], string> = {
   planning: 'bg-lavender-100 text-plum-600 dark:bg-plum-800 dark:text-lavender-200',
@@ -65,8 +66,9 @@ export function TripDetailPage() {
               <p className="mt-1 text-plum-500 dark:text-plum-300">{trip.description}</p>
             )}
             {(trip.start_date || trip.end_date) && (
-              <p className="mt-1 text-sm text-plum-400">
-                {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blush-50 px-3 py-1 text-sm text-plum-500 dark:bg-plum-800 dark:text-plum-300">
+                <CalendarDays size={14} strokeWidth={2} className="shrink-0 text-blush-500 dark:text-blush-300" />
+                {formatDateRange(trip.start_date, trip.end_date)}
               </p>
             )}
           </div>

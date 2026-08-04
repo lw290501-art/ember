@@ -10,6 +10,7 @@ import { StickerOverlay, StickerPicker } from './Stickers'
 import { PassportStamp } from '../flights/PassportStamp'
 import { ScrapbookCanvas } from './canvas/ScrapbookCanvas'
 import { IllustratedWorldMap } from './IllustratedWorldMap'
+import { formatDateRange } from '../../lib/formatDate'
 
 type ScrapbookData = {
   trip: Trip
@@ -191,9 +192,7 @@ export function ScrapbookPage() {
         <p className="mb-2 font-display text-sm italic text-blush-600">every memory starts as a spark</p>
         <h1 className="font-display text-4xl font-semibold text-plum-800">{trip.title}</h1>
         {(trip.start_date || trip.end_date) && (
-          <p className="mt-2 text-plum-500">
-            {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
-          </p>
+          <p className="mt-2 text-plum-500">{formatDateRange(trip.start_date, trip.end_date)}</p>
         )}
         {trip.description && <p className="mt-3 text-plum-600">{trip.description}</p>}
         {countries.length > 0 && (

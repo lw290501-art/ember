@@ -5,6 +5,7 @@ import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import type { Trip } from '../../types/database'
 import { ScrapbookSwiper } from './ScrapbookSwiper'
 import { IllustratedWorldMap } from './IllustratedWorldMap'
+import { formatDateRange } from '../../lib/formatDate'
 
 type TripCard = {
   trip: Trip
@@ -147,9 +148,7 @@ export function AllTripsScrapbookPage() {
           {trip.status}
         </span>
         {(trip.start_date || trip.end_date) && (
-          <p className="mt-1 text-sm text-plum-500">
-            {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
-          </p>
+          <p className="mt-1 text-sm text-plum-500">{formatDateRange(trip.start_date, trip.end_date)}</p>
         )}
         {pinCount > 0 && <p className="text-xs text-plum-400">{pinCount} places pinned</p>}
         <Link

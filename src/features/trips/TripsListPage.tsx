@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CalendarDays } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Trip } from '../../types/database'
 import { TripFormModal } from './TripFormModal'
+import { formatDateRange } from '../../lib/formatDate'
 
 const statusColors: Record<Trip['status'], string> = {
   planning: 'bg-lavender-100 text-plum-600 dark:bg-plum-800 dark:text-lavender-200',
@@ -74,8 +76,9 @@ export function TripsListPage() {
                 </p>
               )}
               {(trip.start_date || trip.end_date) && (
-                <p className="text-xs text-plum-400">
-                  {trip.start_date ?? '?'} — {trip.end_date ?? '?'}
+                <p className="flex items-center gap-1.5 text-xs text-plum-400">
+                  <CalendarDays size={13} strokeWidth={2} className="shrink-0" />
+                  {formatDateRange(trip.start_date, trip.end_date)}
                 </p>
               )}
             </Link>
