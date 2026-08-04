@@ -8,6 +8,7 @@ import { BucketListSection } from '../bucketList/BucketListSection'
 import { IllustratedTripMap } from '../map/IllustratedTripMap'
 import { MediaSection } from '../media/MediaSection'
 import { FlightsSection } from '../flights/FlightsSection'
+import { JournalSection } from '../journal/JournalSection'
 import { formatDateRange } from '../../lib/formatDate'
 
 const statusColors: Record<Trip['status'], string> = {
@@ -98,6 +99,7 @@ export function TripDetailPage() {
 
       <BucketListSection tripId={trip.id} title="Bucket list for this trip" />
       <IllustratedTripMap tripId={trip.id} />
+      <JournalSection tripId={trip.id} />
       <FlightsSection tripId={trip.id} />
       <MediaSection tripId={trip.id} />
 

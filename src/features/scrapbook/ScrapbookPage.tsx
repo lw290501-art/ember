@@ -4,13 +4,13 @@ import { Camera, Download, Film, Mic, Ticket } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthContext'
 import { exportElementToPdf } from '../../lib/exportPdf'
-import type { BucketListItem, Flight, Media, Pin, Trip } from '../../types/database'
+import type { BucketListItem, Flight, JournalEntry, Media, Pin, Trip } from '../../types/database'
 import { ScrapbookSwiper } from './ScrapbookSwiper'
 import { StickerOverlay, StickerPicker } from './Stickers'
 import { PassportStamp } from '../flights/PassportStamp'
 import { ScrapbookCanvas } from './canvas/ScrapbookCanvas'
 import { IllustratedWorldMap } from './IllustratedWorldMap'
-import { formatDateRange } from '../../lib/formatDate'
+import { formatDate, formatDateRange } from '../../lib/formatDate'
 
 type ScrapbookData = {
   trip: Trip
@@ -18,6 +18,7 @@ type ScrapbookData = {
   flights: Flight[]
   doneItems: BucketListItem[]
   photos: (Media & { url?: string })[]
+  journalEntries: JournalEntry[]
 }
 
 const typeMeta: Record<Media['type'], { icon: typeof Camera; label: string }> = {
@@ -84,7 +85,7 @@ export function ScrapbookPage() {
     if (!tripId) return
     setLoading(true)
 
-    const [{ data: trip }, { data: pins }, { data: flights }, { data: doneItems }, { data: media }] =
+    const [{ data: trip }, { data: pins }, { data: flights }, { data: doneItems }, { data: media }, { data: journalEntries }] =
       await Promise.all([
         supabase.from('trips').select('*').eq('id', tripId).single(),
         supabase.from('pins').select('*').eq('trip_id', tripId).order('created_at', { ascending: true }),
@@ -96,6 +97,7 @@ export function ScrapbookPage() {
           .eq('trip_id', tripId)
           .in('type', ['photo', 'ticket'])
           .order('created_at', { ascending: true }),
+        supabase.from('journal_entries').select('*').eq('trip_id', tripId).order('entry_date', { ascending: true }),
       ])
 
     if (!trip) {
@@ -117,7 +119,14 @@ export function ScrapbookPage() {
       photos = mediaRows.map((m) => ({ ...m, url: urlByPath.get(m.storage_path) }))
     }
 
-    setData({ trip, pins: pins ?? [], flights: flights ?? [], doneItems: doneItems ?? [], photos })
+    setData({
+      trip,
+      pins: pins ?? [],
+      flights: flights ?? [],
+      doneItems: doneItems ?? [],
+      photos,
+      journalEntries: journalEntries ?? [],
+    })
     setLoading(false)
   }
 
@@ -176,7 +185,7 @@ export function ScrapbookPage() {
   if (loading) return <p className="text-plum-400">Loading…</p>
   if (!data) return <p className="text-plum-400">Trip not found.</p>
 
-  const { trip, pins, flights, doneItems, photos } = data
+  const { trip, pins, flights, doneItems, photos, journalEntries } = data
   const countries = [...new Set(pins.map((p) => p.country).filter((c): c is string => Boolean(c)))]
 
   // html2canvas (used for the PDF export) reliably chokes on the interactive
@@ -311,6 +320,39 @@ export function ScrapbookPage() {
         />
       </div>,
     )
+
+    // Journal entries, styled as handwritten diary pages
+    journalEntries.forEach((entry) => {
+      built.push(
+        <div className="flex h-full flex-col justify-center">
+          <div
+            className="relative rounded-sm bg-white p-6 shadow-md dark:bg-plum-950"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(190, 24, 93, 0.08) 32px)',
+            }}
+          >
+            <p className="font-display text-xs uppercase tracking-wide text-blush-500">
+              {formatDate(entry.entry_date)}
+            </p>
+            <div className="mt-1 flex items-center gap-2">
+              {entry.mood && <span className="text-xl leading-none">{entry.mood}</span>}
+              {entry.title && (
+                <h2 className="text-2xl font-semibold text-plum-800" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  {entry.title}
+                </h2>
+              )}
+            </div>
+            <p
+              className="mt-3 whitespace-pre-wrap text-xl leading-8 text-plum-700"
+              style={{ fontFamily: "'Caveat', cursive" }}
+            >
+              {entry.content}
+            </p>
+          </div>
+        </div>,
+      )
+    })
 
     // Flights, as passport stamps
     if (flights.length > 0) {

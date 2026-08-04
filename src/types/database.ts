@@ -70,6 +70,17 @@ export type Flight = {
   created_at: string
 }
 
+export type JournalEntry = {
+  id: string
+  trip_id: string
+  entry_date: string
+  title: string | null
+  content: string
+  mood: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type ScrapbookBlockType = 'photo' | 'text'
 
 export type ScrapbookBlock = {
@@ -136,6 +147,16 @@ export type Database = {
         Row: Flight
         Insert: Omit<Flight, 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Omit<Flight, 'id' | 'trip_id'>>
+        Relationships: []
+      }
+      journal_entries: {
+        Row: JournalEntry
+        Insert: Omit<JournalEntry, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Omit<JournalEntry, 'id' | 'trip_id'>>
         Relationships: []
       }
       scrapbook_blocks: {
