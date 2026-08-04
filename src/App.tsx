@@ -10,6 +10,7 @@ import { BucketListPage } from './features/bucketList/BucketListPage'
 import { StatsPage } from './features/stats/StatsPage'
 import { ScrapbookPage } from './features/scrapbook/ScrapbookPage'
 import { AllTripsScrapbookPage } from './features/scrapbook/AllTripsScrapbookPage'
+import { SharedScrapbookPage } from './features/scrapbook/SharedScrapbookPage'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/shared/:token" element={<SharedScrapbookPage />} />
 
             <Route element={<ProtectedRoute />}>
               <Route path="/trips" element={<TripsListPage />} />

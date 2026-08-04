@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Camera, Download, Film, Mic, Ticket } from 'lucide-react'
+import { Camera, Download, Film, Mic, Share2, Ticket } from 'lucide-react'
 import { supabase, MEDIA_BUCKET } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthContext'
 import { exportElementToPdf } from '../../lib/exportPdf'
@@ -10,6 +10,7 @@ import { StickerOverlay, StickerPicker } from './Stickers'
 import { PassportStamp } from '../flights/PassportStamp'
 import { ScrapbookCanvas } from './canvas/ScrapbookCanvas'
 import { IllustratedWorldMap } from './IllustratedWorldMap'
+import { ShareModal } from './ShareModal'
 import { formatDate, formatDateRange } from '../../lib/formatDate'
 
 type ScrapbookData = {
@@ -78,6 +79,7 @@ export function ScrapbookPage() {
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -392,24 +394,41 @@ export function ScrapbookPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <Link
           to={`/trips/${trip.id}`}
           className="text-sm text-blush-600 hover:underline dark:text-blush-300"
         >
           ← Back to trip
         </Link>
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="flex items-center gap-1.5 rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
-        >
-          <Download size={16} strokeWidth={2} />
-          {exporting ? 'Preparing PDF…' : 'Save as PDF to send'}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setShowShare(true)}
+            className="flex items-center gap-1.5 rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+          >
+            <Share2 size={16} strokeWidth={2} />
+            {trip.share_token ? 'Shared' : 'Share'}
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="flex items-center gap-1.5 rounded-full border border-blush-400 px-4 py-2 text-sm font-medium text-blush-600 hover:bg-blush-50 disabled:opacity-60 dark:border-blush-300 dark:text-blush-200 dark:hover:bg-plum-800"
+          >
+            <Download size={16} strokeWidth={2} />
+            {exporting ? 'Preparing PDF…' : 'Save as PDF to send'}
+          </button>
+        </div>
       </div>
 
       <ScrapbookSwiper slides={slides} />
+
+      {showShare && (
+        <ShareModal
+          trip={trip}
+          onClose={() => setShowShare(false)}
+          onUpdated={(updated) => setData({ ...data, trip: updated })}
+        />
+      )}
 
       {/* Off-screen full stack, used only to render the PDF export */}
       <div

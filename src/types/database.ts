@@ -17,6 +17,7 @@ export type Trip = {
   end_date: string | null
   status: TripStatus
   cover_stickers: string[] | null
+  share_token: string | null
   created_at: string
 }
 
@@ -110,10 +111,11 @@ export type Database = {
     Tables: {
       trips: {
         Row: Trip
-        Insert: Omit<Trip, 'id' | 'created_at' | 'cover_stickers'> & {
+        Insert: Omit<Trip, 'id' | 'created_at' | 'cover_stickers' | 'share_token'> & {
           id?: string
           created_at?: string
           cover_stickers?: string[] | null
+          share_token?: string | null
         }
         Update: Partial<Omit<Trip, 'id' | 'user_id'>>
         Relationships: []

@@ -86,9 +86,6 @@ gracefully) — you need them for sign-up, trips, pins, and uploads to work.
 - "My Travels" — an overall scrapbook aggregating stats and an illustrated
   world map across your whole account, plus a card per trip linking into each
   trip's own scrapbook
-
-## Not yet built
-
-- Live public web link sharing (currently sharing is export-and-send only,
-  by design — no backend changes needed, nothing about your trips is exposed
-  publicly)
+- Live share links — generate a public, read-only link per trip from the
+  scrapbook page (no account needed to view), revoke it any time; access is
+  enforced by Supabase row-level security keyed off a per-trip share token
